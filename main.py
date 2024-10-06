@@ -140,6 +140,34 @@ def obtener_detalles_por_book_id(book_id: int):
     except mysql.connector.Error as err:
         raise HTTPException(status_code=500, detail=f"Error: {str(err)}")
 
+# Nueva API: Obtener author_id por name del author
+@app.get("/authors/get_author_id/")
+def obtener_author_id_por_name(author_name: str):
+    try:
+        # Conexión a la base de datos
+        mydb = mysql.connector.connect(
+            host=host_name,
+            port=port_number,
+            user=user_name,
+            password=password_db,
+            database=database_name
+        )
+        cursor = mydb.cursor()
+
+        # Buscar el author_id basado en el nombre del autor
+        cursor.execute("SELECT id FROM authors WHERE name = %s", (author_name,))
+        author_id = cursor.fetchone()
+        if not author_id:
+            raise HTTPException(status_code=404, detail="Author not found")
+
+        cursor.close()
+        mydb.close()
+
+        # Devolver el author_id
+        return {"author_id": author_id[0]}
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {str(err)}")
+
 
 # Esquema para los libros (books)
 class BookBase(BaseModel):
